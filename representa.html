@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Representa — Acelere seu negócio</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --preto: #0a0a0a;
+    --branco: #f4f1ec;
+    --laranja: #FF4D00;
+    --laranja-claro: #FF7A3D;
+    --cinza: #1a1a1a;
+    --cinza-medio: #2e2e2e;
+    --texto-suave: #888;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--preto);
+    color: var(--branco);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CURSOR CUSTOM */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--laranja);
+    border-radius: 50%;
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease, width 0.2s, height 0.2s;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--laranja);
+    border-radius: 50%;
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.35s ease, width 0.2s, height 0.2s, opacity 0.2s;
+    transform: translate(-50%, -50%);
+    opacity: 0.5;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 28px 60px;
+    background: transparent;
+    transition: background 0.4s;
+  }
+  nav.scrolled { background: rgba(10,10,10,0.95); backdrop-filter: blur(12px); }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 4px;
+    color: var(--branco);
+    text-decoration: none;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .nav-logo .seta {
+    color: var(--laranja);
+    font-size: 28px;
+    display: inline-block;
+    animation: pulsar-seta 1.8s ease-in-out infinite;
+  }
+  @keyframes pulsar-seta {
+    0%, 100% { transform: translateX(0); opacity: 1; }
+    50% { transform: translateX(5px); opacity: 0.7; }
+  }
+
+  .nav-links { display: flex; gap: 40px; list-style: none; }
+  .nav-links a {
+    color: var(--branco);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    transition: opacity 0.2s, color 0.2s;
+  }
+  .nav-links a:hover { opacity: 1; color: var(--laranja); }
+
+  .nav-cta {
+    background: var(--laranja);
+    color: var(--preto) !important;
+    padding: 10px 24px;
+    font-weight: 600 !important;
+    letter-spacing: 2px;
+    opacity: 1 !important;
+    transition: background 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--laranja-claro) !important; color: var(--preto) !important; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 120px 60px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 70% 40%, rgba(255,77,0,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-grid-lines {
+    position: absolute; inset: 0;
+    background-image: 
+      linear-gradient(rgba(255,77,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,77,0,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--laranja);
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.3s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(72px, 12vw, 180px);
+    line-height: 0.9;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.5s forwards;
+  }
+
+  .hero-title .destaque { color: var(--laranja); }
+  .hero-title .seta-hero {
+    color: var(--laranja);
+    display: inline-block;
+    animation: seta-move 1.5s ease-in-out infinite;
+  }
+  @keyframes seta-move {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(18px); }
+  }
+
+  .hero-sub {
+    font-size: clamp(14px, 1.8vw, 18px);
+    font-weight: 300;
+    color: var(--texto-suave);
+    max-width: 480px;
+    line-height: 1.7;
+    margin-top: 32px;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.7s forwards;
+  }
+
+  .hero-btns {
+    display: flex; gap: 20px; align-items: center;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.9s forwards;
+  }
+
+  .btn-primary {
+    background: var(--laranja);
+    color: var(--preto);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 16px 36px;
+    border: none;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 10px;
+    transition: background 0.2s, transform 0.2s;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+  .btn-primary:hover { background: var(--laranja-claro); transform: translateY(-2px); }
+
+  .btn-ghost {
+    color: var(--branco);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: flex; align-items: center; gap: 8px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+  .btn-ghost:hover { opacity: 1; }
+
+  .hero-numero {
+    position: absolute; right: 60px; bottom: 80px;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 24px;
+    opacity: 0;
+    animation: fadeLeft 0.8s 1.1s forwards;
+  }
+  .stat-item { text-align: right; }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px;
+    color: var(--laranja);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0.5;
+  }
+  .stat-sep { width: 1px; height: 60px; background: rgba(255,77,0,0.3); }
+
+  /* SOBRE */
+  .sobre {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .sobre-tag {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--laranja);
+    margin-bottom: 20px;
+  }
+
+  .sobre-titulo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(36px, 4vw, 60px);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 28px;
+  }
+
+  .sobre-texto {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--texto-suave);
+    margin-bottom: 20px;
+  }
+
+  .sobre-direita {
+    display: flex; flex-direction: column; gap: 24px;
+  }
+
+  .pilar {
+    display: flex; gap: 20px; align-items: flex-start;
+    padding: 28px;
+    background: var(--cinza);
+    border-left: 3px solid var(--laranja);
+    transition: transform 0.2s;
+  }
+  .pilar:hover { transform: translateX(6px); }
+
+  .pilar-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .pilar h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .pilar p { font-size: 14px; color: var(--texto-suave); line-height: 1.6; }
+
+  /* SERVIÇOS */
+  .servicos {
+    padding: 120px 60px;
+    background: var(--cinza);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .servicos::before {
+    content: 'SERVIÇOS';
+    position: absolute;
+    top: 40px; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 200px;
+    color: rgba(255,255,255,0.02);
+    letter-spacing: 20px;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .section-header { text-align: center; margin-bottom: 80px; }
+  .section-tag {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--laranja);
+    margin-bottom: 16px;
+  }
+  .section-titulo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  .servicos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    position: relative; z-index: 1;
+  }
+
+  .card-servico {
+    background: var(--preto);
+    padding: 48px 36px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+    cursor: none;
+  }
+  .card-servico::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--laranja);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .card-servico:hover { background: #111; }
+  .card-servico:hover::after { transform: scaleX(1); }
+
+  .card-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    color: rgba(255,77,0,0.15);
+    line-height: 1;
+    margin-bottom: 16px;
+    transition: color 0.3s;
+  }
+  .card-servico:hover .card-num { color: rgba(255,77,0,0.4); }
+
+  .card-servico h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    letter-spacing: 1px;
+  }
+  .card-servico p { font-size: 14px; color: var(--texto-suave); line-height: 1.7; }
+
+  /* DIFERENCIAL — TREINAMENTO */
+  .treinamento {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .badge-destaque {
+    display: inline-block;
+    background: rgba(255,77,0,0.15);
+    border: 1px solid rgba(255,77,0,0.4);
+    color: var(--laranja);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    margin-bottom: 24px;
+  }
+
+  .treinamento-titulo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(36px, 4vw, 60px);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 24px;
+  }
+
+  .treinamento-texto { font-size: 16px; line-height: 1.8; color: var(--texto-suave); margin-bottom: 40px; }
+
+  .etapas { display: flex; flex-direction: column; gap: 0; }
+  .etapa {
+    display: flex; gap: 24px; align-items: flex-start;
+    padding: 24px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .etapa:last-child { border-bottom: none; }
+  .etapa-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--laranja);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 40px;
+  }
+  .etapa h4 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+  }
+  .etapa p { font-size: 14px; color: var(--texto-suave); line-height: 1.6; }
+
+  .visual-treinamento {
+    background: var(--cinza);
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .visual-treinamento::before {
+    content: '→';
+    position: absolute;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 300px;
+    color: rgba(255,77,0,0.05);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .resultado-card {
+    background: var(--preto);
+    padding: 28px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 3px solid transparent;
+    transition: border-color 0.3s, transform 0.3s;
+    position: relative; z-index: 1;
+  }
+  .resultado-card:hover { border-left-color: var(--laranja); transform: translateX(6px); }
+  .resultado-card h4 { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+  .resultado-card p { font-size: 13px; color: var(--texto-suave); }
+  .resultado-pct {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    color: var(--laranja);
+    flex-shrink: 0;
+  }
+
+  /* CLÍNICAS */
+  .clinicas {
+    padding: 80px 60px;
+    background: var(--laranja);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+  }
+  .clinicas-texto h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(32px, 4vw, 56px);
+    color: var(--preto);
+    margin-bottom: 12px;
+    letter-spacing: 2px;
+  }
+  .clinicas-texto p { font-size: 16px; color: rgba(10,10,10,0.7); max-width: 500px; line-height: 1.6; }
+  .clinicas-icones {
+    display: flex; gap: 32px; flex-shrink: 0;
+  }
+  .clinica-icon {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    opacity: 0.8;
+  }
+  .clinica-icon span:first-child { font-size: 36px; }
+  .clinica-icon span:last-child { font-size: 11px; font-weight: 600; letter-spacing: 1px; color: var(--preto); text-transform: uppercase; }
+
+  /* CTA FINAL */
+  .cta-final {
+    padding: 160px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-final::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(255,77,0,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cta-final h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 10vw, 140px);
+    letter-spacing: 4px;
+    line-height: 0.95;
+    margin-bottom: 32px;
+    position: relative; z-index: 1;
+  }
+  .cta-final h2 .laranja { color: var(--laranja); }
+  .cta-final p {
+    font-size: 18px;
+    color: var(--texto-suave);
+    margin-bottom: 48px;
+    position: relative; z-index: 1;
+  }
+  .cta-final .btn-primary { font-size: 14px; padding: 18px 48px; position: relative; z-index: 1; }
+
+  /* FOOTER */
+  footer {
+    padding: 48px 60px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 4px;
+    color: var(--branco);
+  }
+  .footer-logo span { color: var(--laranja); }
+  footer p { font-size: 13px; color: var(--texto-suave); }
+
+  /* ANIMAÇÕES */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeLeft {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: var(--preto); }
+  ::-webkit-scrollbar-thumb { background: var(--laranja); }
+
+  @media (max-width: 900px) {
+    nav { padding: 20px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 120px 24px 80px; }
+    .hero-numero { display: none; }
+    .sobre, .treinamento { grid-template-columns: 1fr; padding: 80px 24px; gap: 48px; }
+    .servicos { padding: 80px 24px; }
+    .servicos-grid { grid-template-columns: 1fr; }
+    .clinicas { flex-direction: column; padding: 60px 24px; }
+    .cta-final { padding: 100px 24px; }
+    footer { flex-direction: column; gap: 16px; text-align: center; padding: 40px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">REPRESENTA <span class="seta">→</span></a>
+  <ul class="nav-links">
+    <li><a href="#sobre">Sobre</a></li>
+    <li><a href="#servicos">Serviços</a></li>
+    <li><a href="#treinamento">Treinamento</a></li>
+    <li><a href="#contato" class="nav-cta">Fale Conosco</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-lines"></div>
+
+  <p class="hero-tag">→ Agência de Marketing & Aceleração Comercial</p>
+  <h1 class="hero-title">
+    SEU NEGÓCIO<br>
+    <span class="destaque">ACELERADO</span><br>
+    <span class="seta-hero">→</span>
+  </h1>
+  <p class="hero-sub">
+    Não apenas marketing. Geramos resultados reais — do tráfego ao fechamento. Treinamos sua equipe, otimizamos sua abordagem e impulsionamos seu crescimento.
+  </p>
+  <div class="hero-btns">
+    <a href="#contato" class="btn-primary">Quero Acelerar <span>→</span></a>
+    <a href="#servicos" class="btn-ghost">Ver Serviços ↓</a>
+  </div>
+
+  <div class="hero-numero">
+    <div class="stat-item">
+      <div class="stat-num">+200</div>
+      <div class="stat-label">Negócios Atendidos</div>
+    </div>
+    <div class="stat-sep"></div>
+    <div class="stat-item">
+      <div class="stat-num">87%</div>
+      <div class="stat-label">Taxa de Conversão</div>
+    </div>
+    <div class="stat-sep"></div>
+    <div class="stat-item">
+      <div class="stat-num">3×</div>
+      <div class="stat-label">ROI Médio</div>
+    </div>
+  </div>
+</section>
+
+<!-- SOBRE -->
+<section class="sobre" id="sobre">
+  <div class="sobre-esquerda reveal">
+    <p class="sobre-tag">→ Quem Somos</p>
+    <h2 class="sobre-titulo">Marketing que vai além do óbvio</h2>
+    <p class="sobre-texto">
+      A Representa nasceu para resolver um problema que a maioria das agências ignora: de nada adianta atrair leads se sua equipe não sabe convertê-los.
+    </p>
+    <p class="sobre-texto">
+      Por isso unimos estratégia de marketing digital com treinamento comercial — uma combinação que gera resultados de verdade, não apenas métricas bonitas.
+    </p>
+  </div>
+  <div class="sobre-direita reveal">
+    <div class="pilar">
+      <div class="pilar-icon">🎯</div>
+      <div>
+        <h3>MARKETING ESTRATÉGICO</h3>
+        <p>Tráfego pago, orgânico, branding e posicionamento integrados para atrair os clientes certos.</p>
+      </div>
+    </div>
+    <div class="pilar">
+      <div class="pilar-icon">🔥</div>
+      <div>
+        <h3>TREINAMENTO COMERCIAL</h3>
+        <p>Capacitamos sua equipe com técnicas de abordagem que transformam leads em clientes pagantes.</p>
+      </div>
+    </div>
+    <div class="pilar">
+      <div class="pilar-icon">→</div>
+      <div>
+        <h3>ACELERAÇÃO CONTÍNUA</h3>
+        <p>Acompanhamento próximo, dados em tempo real e otimização constante para crescimento sustentável.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVIÇOS -->
+<section class="servicos" id="servicos">
+  <div class="section-header reveal">
+    <p class="section-tag">→ O que fazemos</p>
+    <h2 class="section-titulo">Serviços que<br><span style="color:var(--laranja)">geram resultado</span></h2>
+  </div>
+  <div class="servicos-grid">
+    <div class="card-servico reveal">
+      <div class="card-num">01</div>
+      <h3>TRÁFEGO PAGO</h3>
+      <p>Campanhas no Google, Meta e TikTok Ads altamente segmentadas para trazer leads qualificados com o menor custo por aquisição.</p>
+    </div>
+    <div class="card-servico reveal">
+      <div class="card-num">02</div>
+      <h3>GESTÃO DE REDES SOCIAIS</h3>
+      <p>Conteúdo estratégico que posiciona sua marca como autoridade e gera conexão real com seu público-alvo.</p>
+    </div>
+    <div class="card-servico reveal">
+      <div class="card-num">03</div>
+      <h3>IDENTIDADE DE MARCA</h3>
+      <p>Do logo ao tom de voz, construímos marcas que transmitem confiança e se destacam da concorrência.</p>
+    </div>
+    <div class="card-servico reveal">
+      <div class="card-num">04</div>
+      <h3>FUNIS & AUTOMAÇÃO</h3>
+      <p>Estruturamos jornadas de compra automatizadas que nutrem leads e aumentam a taxa de conversão sem esforço manual.</p>
+    </div>
+    <div class="card-servico reveal">
+      <div class="card-num">05</div>
+      <h3>SEO & CONTEÚDO</h3>
+      <p>Estratégias de posicionamento orgânico que geram tráfego consistente e autoridade digital a longo prazo.</p>
+    </div>
+    <div class="card-servico reveal" style="background: rgba(255,77,0,0.08); border: 1px solid rgba(255,77,0,0.2);">
+      <div class="card-num" style="color: rgba(255,77,0,0.5);">★</div>
+      <h3>TREINAMENTO COMERCIAL</h3>
+      <p>Nosso diferencial exclusivo: treinamos sua equipe para converter mais com técnicas de abordagem consultiva e vendas.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TREINAMENTO -->
+<section class="treinamento" id="treinamento">
+  <div class="reveal">
+    <div class="badge-destaque">→ Nosso Diferencial</div>
+    <h2 class="treinamento-titulo">O lead chegou.<br>E agora?</h2>
+    <p class="treinamento-texto">
+      A maioria das agências entrega o lead e vai embora. Nós sabemos que o problema muitas vezes não é a quantidade de leads — é como sua equipe os aborda. Por isso, treinamos do primeiro contato ao fechamento.
+    </p>
+    <div class="etapas">
+      <div class="etapa">
+        <div class="etapa-num">01</div>
+        <div>
+          <h4>DIAGNÓSTICO COMERCIAL</h4>
+          <p>Analisamos seu processo atual de vendas e identificamos os gargalos de conversão.</p>
+        </div>
+      </div>
+      <div class="etapa">
+        <div class="etapa-num">02</div>
+        <div>
+          <h4>TREINAMENTO DE ABORDAGEM</h4>
+          <p>Scripts, técnicas de escuta ativa e gatilhos mentais adaptados ao seu negócio.</p>
+        </div>
+      </div>
+      <div class="etapa">
+        <div class="etapa-num">03</div>
+        <div>
+          <h4>SIMULAÇÕES & ROLEPLAY</h4>
+          <p>Praticamos cenários reais para que sua equipe ganhe confiança e consistência.</p>
+        </div>
+      </div>
+      <div class="etapa">
+        <div class="etapa-num">04</div>
+        <div>
+          <h4>MONITORAMENTO & AJUSTES</h4>
+          <p>Acompanhamos os resultados e refinamos continuamente a abordagem.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="visual-treinamento reveal">
+    <div class="resultado-card">
+      <div>
+        <h4>Taxa de Agendamentos</h4>
+        <p>Após treinamento comercial</p>
+      </div>
+      <div class="resultado-pct">+68%</div>
+    </div>
+    <div class="resultado-card">
+      <div>
+        <h4>Conversão de Orçamentos</h4>
+        <p>Leads qualificados fechados</p>
+      </div>
+      <div class="resultado-pct">+42%</div>
+    </div>
+    <div class="resultado-card">
+      <div>
+        <h4>Ticket Médio</h4>
+        <p>Valor por cliente captado</p>
+      </div>
+      <div class="resultado-pct">+31%</div>
+    </div>
+    <div class="resultado-card">
+      <div>
+        <h4>Tempo de Resposta</h4>
+        <p>Agilidade no primeiro contato</p>
+      </div>
+      <div class="resultado-pct">-73%</div>
+    </div>
+  </div>
+</section>
+
+<!-- CLÍNICAS -->
+<section class="clinicas">
+  <div class="clinicas-texto">
+    <h2>ESPECIALISTAS EM CLÍNICAS MÉDICAS</h2>
+    <p>Conhecemos profundamente o mercado da saúde. Trabalhamos com clínicas de todas as especialidades, entendendo as particularidades regulatórias e o comportamento do paciente moderno.</p>
+  </div>
+  <div class="clinicas-icones">
+    <div class="clinica-icon">
+      <span>🦷</span>
+      <span>Odonto</span>
+    </div>
+    <div class="clinica-icon">
+      <span>👁️</span>
+      <span>Oftalmo</span>
+    </div>
+    <div class="clinica-icon">
+      <span>💆</span>
+      <span>Estética</span>
+    </div>
+    <div class="clinica-icon">
+      <span>🏥</span>
+      <span>Médicas</span>
+    </div>
+    <div class="clinica-icon">
+      <span>✚</span>
+      <span>E mais</span>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-final" id="contato">
+  <h2 class="reveal">
+    PRONTO PARA<br>
+    <span class="laranja">ACELERAR →</span>
+  </h2>
+  <p class="reveal">Vamos conversar sobre o seu negócio. Sem enrolação, sem promessas vazias.</p>
+  <a href="https://wa.me/5500000000000" class="btn-primary reveal" target="_blank">
+    Falar no WhatsApp →
+  </a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">REPRESENTA <span>→</span></div>
+  <p>© 2025 Representa. Acelerando negócios.</p>
+</footer>
+
+<script>
+  // CURSOR
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // NAV SCROLL
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // REVEAL
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(r => observer.observe(r));
+</script>
+</body>
+</html>
